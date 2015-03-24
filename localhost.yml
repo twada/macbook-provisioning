@@ -11,7 +11,8 @@
       - sanemat/font
     homebrew_packages:
       - { name: readline }
-      - { name: openssl, state: linked }
+      - { name: openssl }
+      - { name: openssl, state: linked, install_options: force }
       - { name: python }
       - { name: ansible }
       - { name: coreutils }
@@ -91,7 +92,14 @@
 
     # brew
     - name: brew パッケージをインストール
-      homebrew: name={{ item.name }} state={{ item.state|default('latest') }} install_options={{ item.install_options|default() }}
+      homebrew: >
+        name={{ item.name }}
+        state={{ item.state | default('latest') }}
+        install_options={{
+          item.install_options | default() | join(',')
+          if item.install_options is not string
+          else item.install_options
+        }}
       with_items: homebrew_packages
       register: brew_result
     - name: brew パッケージの情報保存先ディレクトリを作成
